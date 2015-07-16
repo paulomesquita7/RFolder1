@@ -1,0 +1,208 @@
+\documentclass[14pt, a4paper, landscape]{article}
+\usepackage[brazilian]{babel}
+\usepackage[margin=0.5in]{geometry}
+\begin{document}
+\title{Verificação da Consistência do Banco de Dados de Violência - GVE - XXI}
+\author{Município de Presidente Prudente - Mês de Julho - 2015}
+\SweaveOpts{concordance=TRUE}
+\maketitle
+
+\subsection*{ I - Campo 68 em branco}
+
+  A tabela 01 mostra as notificações realizadas no período considerado, em que o campo 68, relativo às circunstâncias da lesão está em branco. Este campo deve ser preenchido com códigos que pertençam ao capítulo XX do CID 10, que diz respeito às causas externas de morbidade e mortalidade. Vale lembrar que o CID é redundante. Para algumas doenças e agravos é possível encontrar mais de um código apropriado. 
+
+  O exemplo mais comum é o de embriaguez por consumo de bebida alcoólica. Este agravo pode ser codificado com o código F10 (Transtornos mentais e comportamentais devidos ao uso de álcool - intoxicação aguda)que esta incluído no capítulo V do CID 10 (Transtornos Mentais e Comportamentais). O mesmo agravo pode ser codificado com X65 ( X65.9 - Auto-intoxicação voluntária por álcool em local não especificado) código que pertence ao capítulo XX (Causas Externas de Morbidade e Mortalidade). 
+
+  Portanto, no caso do preenchimento das fichas de investigação de violência, a regra é utilizar códigos que pertençam ao capítulo XX do CID 10. Voltando ao exemplo da intoxicação alcoolíca aguda, o código a ser usado deve ser o X65 e suas variantes segundo o local de ocorrência X65.0 para intoxicação na residência, X65.1 para habitação coletiva, X65.9 para local não especificado.
+
+
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, ID_UNIDADE, CS_SEXO, NU_IDADE_N, DT_OCOR, CIRC_LESAO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v$DT_OCOR<- as.character(as.Date(v$DT_OCOR, format = "%d/%m/%Y"))
+v<-filter(v, CIRC_LESAO == "", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência com Campo 67 em Branco")
+print(w)
+@
+
+\subsection*{ II - Preechimento incompatível dos campos 54 e 55}
+
+    A tabela 02 lista as notificações em que o preenchimento dos campos 54 e 55 é incompatível. Em todas as investigações em que a resposta ao campo 54 para a pergunta: "Trata-se de lesão autoprovocada?" for "01" de "Sim" o preenchimento do campo 55 deve ser obrigatoriamente "88" de "Não se Aplica". A alternativa "99" de ignorado também seria aceitável, já que o autor da investigação pode argumentar ignorância sobre a(s) razão(ões) que levaram levaram o paciente a perpetrar um ato de violência contra si mesmo. 
+    
+    No entanto, o Manual Instrutiva de Preenchimento da Ficha da Investigação de Violência, publicado em dezembro de 2014 é categórico ao afirmar que o preenchimento do campo 55 nos casos de violência autoprovocada deve ser feito com o código "88".
+    
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-select(v, NU_NOTIFIC,DT_NOTIFIC,ID_MUNICIP, NM_PACIENT,CS_SEXO,NU_IDADE_N,LES_AUTOP,VIOL_MOTIV)
+v<-filter(v, VIOL_MOTIV !="88", LES_AUTOP == 1, DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência com respostas incompatíveis nos campos 54 e 55")
+print(w)
+@
+\subsection*{ III - Preenchimento incompatível dos campos 56, 57 e 68}
+
+  O campo 57 descreve os meios de agressão. Imagine-se uma investigação em que alternativa "Física" do campo 56 "Tipo de Violência" esteja preenchida com "1" de "Sim". Ao mesmo tempo, imagine-se que a alternativa "Enforcamento" do campo 57 "Meio de Agressão" também esteja preenchida com "1" de "Sim". Nesse caso, é razoável imaginar que se trata de violência física do tipo enforcamento, que por sua vez pode ser autoprovocado (CID - X70), o que muitas vezes o é, ou não (CID - Y20). 
+  
+  Sendo assim, é de se esperar que o campo 68 seja preenchido com o esses dois códigos X70 (enforcamento no contexto de violência autoprovocada) ou Y20 (enforcamento no contexto de agressão ou naqueles casos em que se desconhece se a violência foi inflingida por um agressor ou autoprovocada).
+  
+  Dessa forma, a tabela 03 lista todos as investigações em que os campos 56 e 57 assinalam as alternativas "Violência Física" e "Enforcamento" e o campo 68 esta preenchido com o CID diferentes de X70 ou Y20.
+  
+  As tabelas 04, 05, 06 e 07 são semelhantes ao exemplo anterior. Nesses casos excluem-se as investigações de violência autoprovocada, mudando-se apenas o meio de agressão e o CID correspondente a ser entrado no campo  68. 
+  
+  Assim, a tabela 4 lista as investigações em que o preenchimento do campo 56 indica se tratar de violência física e o campo 57 de violência física através de força corporal e espancamento. Nesse caso o campo o campo 68 deve, por coerência ser preenchido com o código Y04.
+  
+  A tabela 5 lista as investigações em que o preenchimento do campo 56 indica se tratar de violência física e o campo 57 de violência física através de objeto contudente. Nesse caso o campo o campo 68 deve, por coerência ser preenchido com o código Y00.
+  
+  A tabela 6 lista as investigações em que o preenchimento do campo 56 indica se tratar de violência física e o campo 57 de violência física através de objeto pérfurocortante. Nesse caso o campo o campo 68 deve, por coerência ser preenchido com o código X99.
+  
+  A tabela 7 lista as investigações em que o preenchimento do campo 56 indica se tratar de violência física e o campo 57 de violência física através de arma de fogo. Nesse caso o campo o campo 68 deve, por coerência ser preenchido com os códigos de X93 a X95.
+  
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v$DT_OCOR<- as.character(as.Date(v$DT_OCOR, format = "%d/%m/%Y"))
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, DT_OCOR, CIRC_LESAO, AG_ENFOR)
+v<-filter(v, AG_ENFOR == "1", CIRC_LESAO != "Y20", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência - Enforcamento com CID diferente de Y20")
+print(w, print.results=FALSE)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, AG_FORCA, VIOL_FISIC, VIOL_SEXU, CIRC_LESAO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_FISIC == "1", VIOL_SEXU != "1", AG_FORCA == "1", CIRC_LESAO != "Y04", CIRC_LESAO != "Y04.4", CIRC_LESAO != "Y04.5", CIRC_LESAO != "Y04.0", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Física através de força corporal espancamento com CID diferente de Y04")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, AG_CORTE, VIOL_FISIC, CIRC_LESAO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_FISIC == "1", AG_CORTE == "1", CIRC_LESAO != "X99", CIRC_LESAO != "X99.0", CIRC_LESAO != "X99.5", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Física através de objeto pérfuro cortante com CID diferente de X99")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, AG_FOGO, VIOL_FISIC, CIRC_LESAO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_FISIC == "1", AG_FOGO == "1", CIRC_LESAO != "X93", CIRC_LESAO != "X93.0", CIRC_LESAO != "X93.5", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Física através de disparo de arma de fogo com CID diferente de X93")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, AG_OBJETO, VIOL_FISIC, CIRC_LESAO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_FISIC == "1", AG_OBJETO == "1", CIRC_LESAO != "Y00", CIRC_LESAO != "Y00.0", DT_NOTIFIC >= "2015-01-01", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Física através de objeto contundente com CID diferente de Y00")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, VIOL_SEXU, CIRC_LESAO, SEX_ASSEDI, SEX_PUDOR, SEX_ESTUPR, SEX_PORNO, SEX_EXPLO, SEX_OUTRO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_SEXU == "1", CIRC_LESAO != "Y05", CIRC_LESAO != "Y05.0", DT_NOTIFIC >= "2015-01-01", SEX_ASSEDI != "1", SEX_PUDOR != "1", SEX_ESTUPR != "1", SEX_PORNO != "1", SEX_EXPLO != "1", SEX_OUTRO != "1", ID_MUNICIP == "Presidente Prudente" )
+w<-xtable(v, caption="Notificações de Caso de Violência Sexual sem classificação do tipo de Violência Sexual")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET8.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, VIOL_SEXU, CIRC_LESAO, SEX_ASSEDI, SEX_PUDOR, SEX_ESTUPR, SEX_PORNO, SEX_EXPLO, SEX_OUTRO)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v<-filter(v, VIOL_SEXU != "1", DT_NOTIFIC >= "2015-01-01", SEX_ASSEDI == "1" | SEX_PUDOR == "1" | SEX_ESTUPR == "1"  | SEX_PORNO == "1" | SEX_EXPLO == "1" | SEX_OUTRO == "1", ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Física através de objeto contundente com CID diferente de Y00")
+print(w)
+@
+<<echo=FALSE, results=tex>>==
+setwd("C:/Users/DrPaulo/Desktop/RFolder")
+rm(list=ls())
+stringsAsFactor=FALSE
+v<-read.csv("VIOLENET7.csv", header=T, sep=";")
+v$ID_MUNICIP<-factor(v$ID_MUNICIP,
+                     levels = c(350080,350130,350240,350890,351512,351990,352060,352560,352920,353215,353220,353920,354120,354140,354170,354220,354240,354550,354700,354770,354830,355290,355390,411370,521190),
+                     labels = c("Alfredo Marcondes", "Alvares Machado", "Anhumas", "Caibu","Emilianópolis","Iepê","Indiana","João Ramalho","Martinópolis","Nantes","Narandiba","Pirapozinho","Presidente Bernardes","Presidente Prudente","Quata","Rancharia","Regente Feijó", "Sandovalina", "Santa Maria da Serra", "Santo Anastácio","Santo Expedito","Taciba","Tarabai","Londrina","Jataí"))
+require(dplyr)
+require(xtable)
+v<-select(v, NU_NOTIFIC, DT_NOTIFIC, ID_MUNICIP, CS_SEXO, NU_IDADE_N, DT_OCOR, CIRC_LESAO, CICL_VID)
+v$DT_NOTIFIC<- as.character(as.Date(v$DT_NOTIFIC, format = "%d/%m/%Y"))
+v$DT_OCOR<- as.character(as.Date(v$DT_OCOR, format = "%d/%m/%Y"))
+v<-filter(v, CS_SEXO == "M", CICL_VID == c("3","4"), DT_NOTIFIC >= "2015-01-01" & DT_NOTIFIC <= "2015-07-01", NU_IDADE_N > 4020 & NU_IDADE_N <4060, ID_MUNICIP == "Presidente Prudente")
+w<-xtable(v, caption="Notificações de Caso de Violência Interpessoal contra Adultos do Sexo Masculino")
+print(w)
+@
+
+\end{document}
